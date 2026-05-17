@@ -6,6 +6,7 @@ const path = require('path');
 const { engine } = require('express-handlebars');
 const http = require('http');
 const { Server } = require('socket.io');
+const cors = require('cors');
 
 const app = express();
 
@@ -25,6 +26,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Middlewares
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -67,8 +69,10 @@ io.on('connection', (socket) => {
 
 const authRoutes = require('./routes/auth');
 const productoRoutes = require('./routes/productos');
+const apiRoutes = require('./routes/api');
 app.use('/', authRoutes);
 app.use('/productos', productoRoutes);
+app.use('/api', apiRoutes);
 
 app.get('/', (req, res) => res.render('home'));
 
