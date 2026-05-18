@@ -6,9 +6,13 @@
             <p class="category">{{ product.categoryId?.nombre || 'Sin categoría' }}</p>
             <p class="price">${{ product.precio.toFixed(2) }}</p>
             <p class="stock">Stock: {{ product.stock }}</p>
-            <button @click="$emit('added-to-cart', product)" :disabled="product.stock <= 0">
+            <button @click="$emit('added-to-cart', product)" :disabled="product.stock <= 0" class="add-btn">
                 {{ product.stock <= 0 ? 'Agotado' : 'Añadir al Carrito' }}
             </button>
+            <div class="admin-controls">
+                <button @click="$emit('edit-product', product._id)" class="edit-btn">Editar</button>
+                <button @click="$emit('delete-product', product._id)" class="delete-btn">Eliminar</button>
+            </div>
         </div>
     </div>
 </template>
@@ -73,7 +77,7 @@ defineEmits(['added-to-cart']);
     margin-bottom: 12px;
 }
 
-button {
+.add-btn {
     background-color: #42b983;
     color: white;
     border: none;
@@ -82,14 +86,47 @@ button {
     cursor: pointer;
     font-weight: bold;
     transition: background 0.2s;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
-button:hover:not(:disabled) {
+.add-btn:hover:not(:disabled) {
     background-color: #3aa876;
 }
 
-button:disabled {
+.add-btn:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+.admin-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.edit-btn, .delete-btn {
+    flex: 1;
+    padding: 5px;
+    font-size: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.2s;
+}
+
+.edit-btn:hover {
+    background-color: #f0ad4e;
+    color: white;
+    border-color: #f0ad4e;
+}
+
+.delete-btn:hover {
+    background-color: #d9534f;
+    color: white;
+    border-color: #d9534f;
 }
 </style>

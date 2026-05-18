@@ -24,11 +24,13 @@
         <div v-else-if="productsError" class="error">{{ productsError }}</div>
         
         <div v-else class="product-grid">
-            <ProductCard 
-                v-for="product in filteredProducts" 
-                :key="product._id" 
-                :product="product" 
+            <ProductCard
+                v-for="product in filteredProducts"
+                :key="product._id"
+                :product="product"
                 @added-to-cart="addToCart"
+                @edit-product="editProduct"
+                @delete-product="deleteProduct"
             />
             <div v-if="filteredProducts.length === 0" class="no-results">
                 No se encontraron productos que coincidan con tu búsqueda.
@@ -39,21 +41,24 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProducts } from '../composables/useProducts';
 import { useCartStore } from '../stores/cart';
 import ProductCard from '../components/ProductCard.vue';
+import api from '../api';
 
-const { 
-    products, 
-    productsLoading, 
-    productsError, 
-    getAllProducts, 
-    categories, 
-    categoriesLoading, 
-    getAllCategories 
+const {
+    products,
+    productsLoading,
+    productsError,
+    getAllProducts,
+    categories,
+    categoriesLoading,
+    getAllCategories
 } = useProducts();
 
 const cartStore = useCartStore();
+const router = useRouter();
 
 const searchQuery = ref('');
 const selectedCategory = ref('');
@@ -71,6 +76,22 @@ const filteredProducts = computed(() => {
 async function addToCart(product) {
     cartStore.addToCart(product);
     alert(`${product.nombre} ha sido añadido al carrito`);
+}
+
+function editProduct(productId) {
+    router.push(`/product/${productId}/edit`);
+}
+
+async function deleteProduct(productId) {
+    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        try {
+            await api.delete(`/products/${productId}`);
+            await getAllProducts(); // Recargar la lista
+            alert('Producto eliminado correctamente');
+        } catch (err) {
+            alert('Error al eliminar el producto');
+        }
+    }
 }
 
 onMounted(async () => {

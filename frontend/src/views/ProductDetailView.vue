@@ -14,9 +14,15 @@
                     <p class="price">${{ product.precio.toFixed(2) }}</p>
                     <p class="description">{{ product.descripcion }}</p>
                     <p class="stock">Stock disponible: {{ product.stock }}</p>
-                    <button @click="addToCart" :disabled="product.stock <= 0" class="add-btn">
-                        {{ product.stock <= 0 ? 'Agotado' : 'Añadir al Carrito' }}
-                    </button>
+                    <div class="actions">
+                        <button @click="addToCart" :disabled="product.stock <= 0" class="add-btn">
+                            {{ product.stock <= 0 ? 'Agotado' : 'Añadir al Carrito' }}
+                        </button>
+                        <div class="admin-actions">
+                            <button @click="$router.push(`/product/${product._id}/edit`)" class="edit-btn">Editar</button>
+                            <button @click="deleteProduct" class="delete-btn">Eliminar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -25,11 +31,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import api from '../api';
 import { useCartStore } from '../stores/cart';
 
 const route = useRoute();
+const router = useRouter();
 const cartStore = useCartStore();
 
 const product = ref(null);
@@ -50,6 +57,18 @@ async function fetchProduct() {
 function addToCart() {
     cartStore.addToCart(product.value);
     alert(`${product.value.nombre} ha sido añadido al carrito`);
+}
+
+async function deleteProduct() {
+    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        try {
+            await api.delete(`/products/${product.value._id}`);
+            alert('Producto eliminado correctamente');
+            router.push('/');
+        } catch (err) {
+            alert('Error al eliminar el producto');
+        }
+    }
 }
 
 onMounted(fetchProduct);
@@ -115,6 +134,13 @@ onMounted(fetchProduct);
     font-weight: 500;
 }
 
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+}
+
 .add-btn {
     background-color: #42b983;
     color: white;
@@ -125,6 +151,7 @@ onMounted(fetchProduct);
     font-weight: bold;
     cursor: pointer;
     transition: background 0.2s;
+    width: 100%;
 }
 
 .add-btn:hover:not(:disabled) {
@@ -135,6 +162,36 @@ onMounted(fetchProduct);
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.edit-btn, .delete-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    border: 1px solid #ddd;
+}
+
+.edit-btn {
+    background-color: #f0ad4e;
+    color: white;
+    border-color: #eea236;
+}
+
+.delete-btn {
+    background-color: #d9534f;
+    color: white;
+    border-color: #d43f3a;
+}
+
+.edit-btn:hover { background-color: #ec971f; }
+.delete-btn:hover { background-color: #c9302c; }
 
 .loading, .error {
     text-align: center;
